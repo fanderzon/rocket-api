@@ -1,0 +1,8 @@
+[package]
+authors = ["Fredrik Andersson <fredrik.andersson@widespace.com>"]
+name = "rocket-api"
+version = "0.1.0"
+
+[dependencies]
+rocket = "0.1.5"
+rocket_codegen = "0.1.5"
