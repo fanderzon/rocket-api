@@ -6,10 +6,7 @@ use diesel::prelude::*;
 pub fn get_notes(conn: &PgConnection) -> Vec<Note> {
     use schema::notes::dsl::*;
 
-    notes.filter(pinned.eq(false))
-        .limit(5)
-        .load::<Note>(conn)
-        .expect("Error loading notes")
+    notes.load::<Note>(conn).expect("Error loading notes")
 }
 
 pub fn create_note(conn: &PgConnection, note: NewNote) -> Note {
