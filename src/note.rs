@@ -17,3 +17,12 @@ pub fn create_note(conn: &PgConnection, note: NewNote) -> Note {
         .get_result(conn)
         .expect("Error saving new note")
 }
+
+
+pub fn delete_note(conn: &PgConnection, id: i32) {
+    use schema::notes;
+
+    diesel::delete(notes::table.find(id))
+        .execute(conn)
+        .expect("Failed to delete post");
+}
