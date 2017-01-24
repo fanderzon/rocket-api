@@ -25,16 +25,17 @@ use models::*;
 use rocket_contrib::JSON;
 
 #[get("/note", format = "application/json")]
-fn notes_get() -> Option<JSON<Vec<Note>>> {
+fn notes_get() -> JSON<Vec<Note>> {
     let connection = establish_connection();
     let notes = get_notes(&connection);
-    Some(JSON(notes))
+    JSON(notes)
 }
 
 #[post("/note", format = "application/json", data = "<note>")]
 fn note_create(note: NewNote) -> JSON<Note> {
     let connection = establish_connection();
-    JSON(create_note(&connection, note))
+    let created_note = create_note(&connection, note);
+    JSON(created_note)
 }
 
 fn main() {
