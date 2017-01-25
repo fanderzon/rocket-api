@@ -1,5 +1,5 @@
 use super::schema::notes;
-use rocket::{Request, Data, Outcome};
+use rocket::{Request, Data};
 use rocket::data::{self, FromData};
 use rocket::http::Status;
 use rocket::Outcome::*;
@@ -26,6 +26,7 @@ pub struct NoteData {
 impl FromData for NoteData {
     type Error = String;
 
+    #[allow(unused_variables)]
     fn from_data(req: &Request, data: Data) -> data::Outcome<Self, String> {
         let reader = data.open();
         let json_data: JSON<NoteData> = match serde_json::from_reader(reader).map(|val| JSON(val)) {
