@@ -26,29 +26,41 @@ use note::{get_notes, create_note, delete_note, update_note};
 use models::*;
 use rocket_contrib::JSON;
 use rocket::response::status::NoContent;
+use diesel::result::Error;
 
 #[get("/notes", format = "application/json")]
-fn notes_get(db: DB) -> JSON<Vec<Note>> {
+fn notes_get(db: DB) -> Result<JSON<Vec<Note>>, Error> {
     let notes = get_notes(db.conn());
-    JSON(notes)
+    match notes {
+        Ok(notes) => Ok(JSON(notes)),
+        Err(err) => Err(err),
+    }
 }
 
 #[post("/notes", format = "application/json", data = "<note>")]
-fn note_create(db: DB, note: NoteData) -> JSON<Note> {
+fn note_create(db: DB, note: NoteData) -> Result<JSON<Note>, Error> {
     let created_note = create_note(db.conn(), note);
-    JSON(created_note)
+    match created_note {
+        Ok(note) => Ok(JSON(note)),
+        Err(err) => Err(err),
+    }
 }
 
 #[patch("/notes/<id>", format = "application/json", data = "<note>")]
-fn note_edit(db: DB, id: i32, note: NoteData) -> JSON<Note> {
+fn note_edit(db: DB, id: i32, note: NoteData) -> Result<JSON<Note>, Error> {
     let updated_note = update_note(db.conn(), id, note);
-    JSON(updated_note)
+    match updated_note {
+        Ok(note) => Ok(JSON(note)),
+        Err(err) => Err(err),
+    }
 }
 
 #[delete("/notes/<id>")]
-fn note_delete(db: DB, id: i32) -> NoContent {
-    delete_note(db.conn(), id);
-    NoContent
+fn note_delete(db: DB, id: i32) -> Result<NoContent, Error> {
+    match delete_note(db.conn(), id) {
+        Ok(_) => Ok(NoContent),
+        Err(err) => Err(err),
+    }
 }
 
 fn main() {
