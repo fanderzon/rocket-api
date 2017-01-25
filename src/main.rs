@@ -20,7 +20,7 @@ mod note;
 mod models;
 
 use db::establish_connection;
-use note::{get_notes, create_note, delete_note};
+use note::{get_notes, create_note, delete_note, update_note};
 use models::*;
 use rocket_contrib::JSON;
 use rocket::response::status::NoContent;
@@ -33,10 +33,17 @@ fn notes_get() -> JSON<Vec<Note>> {
 }
 
 #[post("/notes", format = "application/json", data = "<note>")]
-fn note_create(note: NewNote) -> JSON<Note> {
+fn note_create(note: NoteData) -> JSON<Note> {
     let connection = establish_connection();
     let created_note = create_note(&connection, note);
     JSON(created_note)
+}
+
+#[patch("/notes/<id>", format = "application/json", data = "<note>")]
+fn note_edit(id: i32, note: NoteData) -> JSON<Note> {
+    let connection = establish_connection();
+    let updated_note = update_note(&connection, id, note);
+    JSON(updated_note)
 }
 
 #[delete("/notes/<id>")]
@@ -47,5 +54,5 @@ fn note_delete(id: i32) -> NoContent {
 }
 
 fn main() {
-    rocket::ignite().mount("/", routes![note_create, notes_get, note_delete]).launch();
+    rocket::ignite().mount("/", routes![note_create, notes_get, note_delete, note_edit]).launch();
 }

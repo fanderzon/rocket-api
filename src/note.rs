@@ -9,7 +9,7 @@ pub fn get_notes(conn: &PgConnection) -> Vec<Note> {
     notes.load::<Note>(conn).expect("Error loading notes")
 }
 
-pub fn create_note(conn: &PgConnection, note: NewNote) -> Note {
+pub fn create_note(conn: &PgConnection, note: NoteData) -> Note {
     use schema::notes;
 
     diesel::insert(&note)
@@ -25,4 +25,13 @@ pub fn delete_note(conn: &PgConnection, id: i32) {
     diesel::delete(notes::table.find(id))
         .execute(conn)
         .expect("Failed to delete post");
+}
+
+pub fn update_note(conn: &PgConnection, id: i32, updated_note: NoteData) -> Note {
+    use schema::notes;
+
+    diesel::update(notes::table.find(id))
+        .set(&updated_note)
+        .get_result::<Note>(conn)
+        .expect("Failed to update post")
 }
