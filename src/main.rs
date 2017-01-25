@@ -21,37 +21,33 @@ mod db;
 mod note;
 mod models;
 
-use db::establish_connection;
+use db::DB;
 use note::{get_notes, create_note, delete_note, update_note};
 use models::*;
 use rocket_contrib::JSON;
 use rocket::response::status::NoContent;
 
 #[get("/notes", format = "application/json")]
-fn notes_get() -> JSON<Vec<Note>> {
-    let connection = establish_connection();
-    let notes = get_notes(&connection);
+fn notes_get(db: DB) -> JSON<Vec<Note>> {
+    let notes = get_notes(db.conn());
     JSON(notes)
 }
 
 #[post("/notes", format = "application/json", data = "<note>")]
-fn note_create(note: NoteData) -> JSON<Note> {
-    let connection = establish_connection();
-    let created_note = create_note(&connection, note);
+fn note_create(db: DB, note: NoteData) -> JSON<Note> {
+    let created_note = create_note(db.conn(), note);
     JSON(created_note)
 }
 
 #[patch("/notes/<id>", format = "application/json", data = "<note>")]
-fn note_edit(id: i32, note: NoteData) -> JSON<Note> {
-    let connection = establish_connection();
-    let updated_note = update_note(&connection, id, note);
+fn note_edit(db: DB, id: i32, note: NoteData) -> JSON<Note> {
+    let updated_note = update_note(db.conn(), id, note);
     JSON(updated_note)
 }
 
 #[delete("/notes/<id>")]
-fn note_delete(id: i32) -> NoContent {
-    let connection = establish_connection();
-    delete_note(&connection, id);
+fn note_delete(db: DB, id: i32) -> NoContent {
+    delete_note(db.conn(), id);
     NoContent
 }
 
