@@ -22,7 +22,7 @@ mod note;
 mod models;
 
 use db::DB;
-use note::{get_notes, create_note, delete_note, update_note};
+use note::{get_notes, get_note, create_note, delete_note, update_note};
 use models::*;
 use rocket_contrib::JSON;
 use rocket::response::status::NoContent;
@@ -33,6 +33,15 @@ fn notes_get(db: DB) -> Result<JSON<Vec<Note>>, Error> {
     let notes = get_notes(db.conn());
     match notes {
         Ok(notes) => Ok(JSON(notes)),
+        Err(err) => Err(err),
+    }
+}
+
+#[get("/notes/<id>", format = "application/json")]
+fn note_get(db: DB, id: i32) -> Result<JSON<Note>, Error> {
+    let note = get_note(db.conn(), id);
+    match note {
+        Ok(note) => Ok(JSON(note)),
         Err(err) => Err(err),
     }
 }
@@ -64,5 +73,5 @@ fn note_delete(db: DB, id: i32) -> Result<NoContent, Error> {
 }
 
 fn main() {
-    rocket::ignite().mount("/", routes![note_create, notes_get, note_delete, note_edit]).launch();
+    rocket::ignite().mount("/", routes![note_create, notes_get, note_delete, note_edit, note_get]).launch();
 }
