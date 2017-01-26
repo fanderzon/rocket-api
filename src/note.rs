@@ -3,37 +3,34 @@ use diesel;
 use diesel::pg::PgConnection;
 use models::*;
 use diesel::prelude::*;
+use schema::notes;
 
 pub fn get_note(conn: &PgConnection, id: i32) -> Result<Note, Error> {
-    use schema::notes;
-
-    notes::table.find(id).first::<Note>(conn)
+    notes::table
+        .find(id)
+        .first::<Note>(conn)
 }
 
 pub fn get_notes(conn: &PgConnection) -> Result<Vec<Note>, Error> {
-    use schema::notes;
-
-    notes::table.load::<Note>(conn)
+    notes::table
+        .load::<Note>(conn)
 }
 
 pub fn create_note(conn: &PgConnection, note: NoteData) -> Result<Note, Error> {
-    use schema::notes;
-
-    diesel::insert(&note).into(notes::table).get_result(conn)
+    diesel::insert(&note)
+        .into(notes::table)
+        .get_result(conn)
 }
 
 
 pub fn delete_note(conn: &PgConnection, id: i32) -> Result<usize, Error> {
-    use schema::notes;
-
     diesel::delete(notes::table.find(id))
         .execute(conn)
 }
 
 pub fn update_note(conn: &PgConnection, id: i32, updated_note: NoteData) -> Result<Note, Error> {
-    use schema::notes;
-
-    diesel::update(notes::table.find(id))
+    diesel::update(notes::table
+        .find(id))
         .set(&updated_note)
         .get_result::<Note>(conn)
 }
