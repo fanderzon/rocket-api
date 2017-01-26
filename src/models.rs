@@ -29,16 +29,9 @@ impl FromData for NoteData {
     #[allow(unused_variables)]
     fn from_data(req: &Request, data: Data) -> data::Outcome<Self, String> {
         let reader = data.open();
-        let json_data: JSON<NoteData> = match serde_json::from_reader(reader)
-            .map(|val| JSON(val)) {
-            Ok(value) => value,
-            Err(e) => return Failure((Status::BadRequest, e.to_string())),
-        };
-
-        Success(NoteData {
-            title: json_data.title.to_owned(),
-            body: json_data.body.to_owned(),
-            pinned: json_data.pinned,
-        })
+        match serde_json::from_reader(reader).map(|val| val) {
+            Ok(value) => Success(value),
+            Err(e) => Failure((Status::BadRequest, e.to_string()))
+        }
     }
 }
