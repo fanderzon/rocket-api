@@ -4,10 +4,16 @@ use diesel::pg::PgConnection;
 use models::*;
 use diesel::prelude::*;
 
-pub fn get_notes(conn: &PgConnection) -> Result<Vec<Note>, Error> {
-    use schema::notes::dsl::*;
+pub fn get_note(conn: &PgConnection, id: i32) -> Result<Note, Error> {
+    use schema::notes;
 
-    notes.load::<Note>(conn)
+    notes::table.find(id).first::<Note>(conn)
+}
+
+pub fn get_notes(conn: &PgConnection) -> Result<Vec<Note>, Error> {
+    use schema::notes;
+
+    notes::table.load::<Note>(conn)
 }
 
 pub fn create_note(conn: &PgConnection, note: NoteData) -> Result<Note, Error> {
