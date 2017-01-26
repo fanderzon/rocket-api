@@ -32,6 +32,13 @@ fn notes_get() -> JSON<Vec<Note>> {
     JSON(notes)
 }
 
+#[get("/notes/<id>", format = "application/json")]
+fn note_get(db: DB, id: i32) -> JSON<Note> {
+    let connection = establish_connection();
+    let note = get_note(&connection, id);
+    JSON(note)
+}
+
 #[post("/notes", format = "application/json", data = "<note>")]
 fn note_create(note: NoteData) -> JSON<Note> {
     let connection = establish_connection();
