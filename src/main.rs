@@ -20,13 +20,16 @@ mod schema;
 mod db;
 mod note;
 mod models;
+mod error;
 
 use db::DB;
 use note::{get_notes, get_note, create_note, delete_note, update_note};
 use models::*;
 use rocket_contrib::JSON;
+use rocket::http::Status;
 use rocket::response::status::NoContent;
 use diesel::result::Error;
+use error::Error as ApiError;
 
 #[get("/notes", format = "application/json")]
 fn notes_get(db: DB) -> Result<JSON<Vec<Note>>, Error> {
@@ -38,12 +41,21 @@ fn notes_get(db: DB) -> Result<JSON<Vec<Note>>, Error> {
 }
 
 #[get("/notes/<id>", format = "application/json")]
-fn note_get(db: DB, id: i32) -> Result<JSON<Note>, Error> {
+fn note_get(db: DB, id: i32) -> Result<JSON<Note>, ApiError> {
     let note = get_note(db.conn(), id);
     match note {
         Ok(note) => Ok(JSON(note)),
-        Err(err) => Err(err),
+        Err(err) => {
+            match err {
+                Error::NotFound => Err(ApiError::NotFound(err)),
+                _ => Err(ApiError::InternalServerError(err)),
+            }
+        }
     }
+    // match note {
+    //     Ok(note) => Ok(JSON(note)),
+    //     Err(err) => Err(ApiError(err)),
+    // }
 }
 
 #[post("/notes", format = "application/json", data = "<note>")]
@@ -73,5 +85,8 @@ fn note_delete(db: DB, id: i32) -> Result<NoContent, Error> {
 }
 
 fn main() {
-    rocket::ignite().mount("/", routes![note_create, notes_get, note_delete, note_edit, note_get]).launch();
+    rocket::ignite()
+        .mount("/",
+               routes![note_create, notes_get, note_delete, note_edit, note_get])
+        .launch();
 }

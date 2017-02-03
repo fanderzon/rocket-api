@@ -31,7 +31,7 @@ impl FromData for NoteData {
         let reader = data.open();
         match serde_json::from_reader(reader).map(|val| val) {
             Ok(value) => Success(value),
-            Err(e) => Failure((Status::BadRequest, e.to_string()))
+            Err(e) => Failure((Status::BadRequest, e.to_string())),
         }
     }
 }
