@@ -1,4 +1,5 @@
 use std::error::Error as StdError;
+use std::convert::From;
 use std::fmt;
 use diesel::result::Error as DieselError;
 use rocket::http::Status;
@@ -7,15 +8,24 @@ use rocket_contrib::JSON;
 
 #[derive(Debug)]
 pub enum Error {
-    NotFound(DieselError),
-    InternalServerError(DieselError),
+    NotFound,
+    InternalServerError,
 }
 
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            Error::NotFound(ref err) => err.fmt(f),
-            Error::InternalServerError(ref err) => err.fmt(f),
+            Error::NotFound => f.write_str("NotFound"),
+            Error::InternalServerError => f.write_str("InternalServerError"),
+        }
+    }
+}
+
+impl From<DieselError> for Error {
+    fn from(e: DieselError) -> Self {
+        match e {
+            DieselError::NotFound => Error::NotFound,
+            _ => Error::InternalServerError,
         }
     }
 }
@@ -23,15 +33,8 @@ impl fmt::Display for Error {
 impl StdError for Error {
     fn description(&self) -> &str {
         match *self {
-            Error::NotFound(ref err) => err.description(),
-            Error::InternalServerError(ref err) => err.description(),
-        }
-    }
-
-    fn cause(&self) -> Option<&StdError> {
-        match *self {
-            Error::NotFound(ref err) => Some(err),
-            Error::InternalServerError(ref err) => Some(err),
+            Error::NotFound => "Record not found",
+            Error::InternalServerError => "Internal server error",
         }
     }
 }
@@ -40,7 +43,7 @@ impl StdError for Error {
 impl<'r> Responder<'r> for Error {
     fn respond(self) -> Result<Response<'r>, Status> {
         match self {
-            Error::NotFound(err) => Err(Status::NotFound),
+            Error::NotFound => Err(Status::NotFound),
             _ => Err(Status::InternalServerError),
         }
     }

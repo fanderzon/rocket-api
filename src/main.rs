@@ -42,20 +42,10 @@ fn notes_get(db: DB) -> Result<JSON<Vec<Note>>, Error> {
 
 #[get("/notes/<id>", format = "application/json")]
 fn note_get(db: DB, id: i32) -> Result<JSON<Note>, ApiError> {
-    let note = get_note(db.conn(), id);
-    match note {
+    match get_note(db.conn(), id) {
         Ok(note) => Ok(JSON(note)),
-        Err(err) => {
-            match err {
-                Error::NotFound => Err(ApiError::NotFound(err)),
-                _ => Err(ApiError::InternalServerError(err)),
-            }
-        }
+        Err(err) => Err(ApiError::from(err)),
     }
-    // match note {
-    //     Ok(note) => Ok(JSON(note)),
-    //     Err(err) => Err(ApiError(err)),
-    // }
 }
 
 #[post("/notes", format = "application/json", data = "<note>")]
