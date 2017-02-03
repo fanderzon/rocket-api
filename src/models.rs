@@ -4,7 +4,6 @@ use rocket::data::{self, FromData};
 use rocket::http::Status;
 use rocket::Outcome::*;
 use serde_json;
-use rocket_contrib::JSON;
 
 #[derive(Queryable)]
 #[derive(Serialize,Deserialize)]

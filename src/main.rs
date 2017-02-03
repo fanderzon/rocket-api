@@ -9,7 +9,6 @@ extern crate dotenv;
 extern crate serde_json;
 #[macro_use]
 extern crate lazy_static;
-#[macro_use]
 extern crate rocket_contrib;
 #[macro_use]
 extern crate serde_derive;
@@ -26,17 +25,14 @@ use db::DB;
 use note::{get_notes, get_note, create_note, delete_note, update_note};
 use models::*;
 use rocket_contrib::JSON;
-use rocket::http::Status;
 use rocket::response::status::NoContent;
-use diesel::result::Error;
 use error::Error as ApiError;
 
 #[get("/notes", format = "application/json")]
-fn notes_get(db: DB) -> Result<JSON<Vec<Note>>, Error> {
-    let notes = get_notes(db.conn());
-    match notes {
+fn notes_get(db: DB) -> Result<JSON<Vec<Note>>, ApiError> {
+    match get_notes(db.conn()) {
         Ok(notes) => Ok(JSON(notes)),
-        Err(err) => Err(err),
+        Err(err) => Err(ApiError::from(err)),
     }
 }
 
@@ -49,28 +45,26 @@ fn note_get(db: DB, id: i32) -> Result<JSON<Note>, ApiError> {
 }
 
 #[post("/notes", format = "application/json", data = "<note>")]
-fn note_create(db: DB, note: NoteData) -> Result<JSON<Note>, Error> {
-    let created_note = create_note(db.conn(), note);
-    match created_note {
+fn note_create(db: DB, note: NoteData) -> Result<JSON<Note>, ApiError> {
+    match create_note(db.conn(), note) {
         Ok(note) => Ok(JSON(note)),
-        Err(err) => Err(err),
+        Err(err) => Err(ApiError::from(err)),
     }
 }
 
 #[patch("/notes/<id>", format = "application/json", data = "<note>")]
-fn note_edit(db: DB, id: i32, note: NoteData) -> Result<JSON<Note>, Error> {
-    let updated_note = update_note(db.conn(), id, note);
-    match updated_note {
+fn note_edit(db: DB, id: i32, note: NoteData) -> Result<JSON<Note>, ApiError> {
+    match update_note(db.conn(), id, note) {
         Ok(note) => Ok(JSON(note)),
-        Err(err) => Err(err),
+        Err(err) => Err(ApiError::from(err)),
     }
 }
 
 #[delete("/notes/<id>")]
-fn note_delete(db: DB, id: i32) -> Result<NoContent, Error> {
+fn note_delete(db: DB, id: i32) -> Result<NoContent, ApiError> {
     match delete_note(db.conn(), id) {
         Ok(_) => Ok(NoContent),
-        Err(err) => Err(err),
+        Err(err) => Err(ApiError::from(err)),
     }
 }
 

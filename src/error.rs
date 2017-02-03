@@ -4,7 +4,6 @@ use std::fmt;
 use diesel::result::Error as DieselError;
 use rocket::http::Status;
 use rocket::response::{Response, Responder};
-use rocket_contrib::JSON;
 
 #[derive(Debug)]
 pub enum Error {
