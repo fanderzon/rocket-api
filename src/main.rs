@@ -25,7 +25,7 @@ use db::DB;
 use note::{get_notes, get_note, create_note, delete_note, update_note};
 use models::*;
 use rocket_contrib::JSON;
-use rocket::response::status::NoContent;
+use rocket::response::status::{Created, NoContent};
 use error::Error as ApiError;
 
 #[get("/notes", format = "application/json")]
@@ -45,9 +45,12 @@ fn note_get(db: DB, id: i32) -> Result<JSON<Note>, ApiError> {
 }
 
 #[post("/notes", format = "application/json", data = "<note>")]
-fn note_create(db: DB, note: NoteData) -> Result<JSON<Note>, ApiError> {
+fn note_create(db: DB, note: NoteData) -> Result<Created<JSON<Note>>, ApiError> {
     match create_note(db.conn(), note) {
-        Ok(note) => Ok(JSON(note)),
+        Ok(note) => {
+            let url = format!("/note/{}", note.id);
+            Ok(Created(url, Some(JSON(note))))
+        }
         Err(err) => Err(ApiError::from(err)),
     }
 }
