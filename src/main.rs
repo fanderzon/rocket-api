@@ -30,45 +30,33 @@ use error::Error as ApiError;
 
 #[get("/notes", format = "application/json")]
 fn notes_get(db: DB) -> Result<JSON<Vec<Note>>, ApiError> {
-    match get_notes(db.conn()) {
-        Ok(notes) => Ok(JSON(notes)),
-        Err(err) => Err(ApiError::from(err)),
-    }
+    let notes = get_notes(db.conn())?;
+    Ok(JSON(notes))
 }
 
 #[get("/notes/<id>", format = "application/json")]
 fn note_get(db: DB, id: i32) -> Result<JSON<Note>, ApiError> {
-    match get_note(db.conn(), id) {
-        Ok(note) => Ok(JSON(note)),
-        Err(err) => Err(ApiError::from(err)),
-    }
+    let note = get_note(db.conn(), id)?;
+    Ok(JSON(note))
 }
 
 #[post("/notes", format = "application/json", data = "<note>")]
 fn note_create(db: DB, note: NoteData) -> Result<Created<JSON<Note>>, ApiError> {
-    match create_note(db.conn(), note) {
-        Ok(note) => {
-            let url = format!("/note/{}", note.id);
-            Ok(Created(url, Some(JSON(note))))
-        }
-        Err(err) => Err(ApiError::from(err)),
-    }
+    let note = create_note(db.conn(), note)?;
+    let url = format!("/note/{}", note.id);
+    Ok(Created(url, Some(JSON(note))))
 }
 
 #[patch("/notes/<id>", format = "application/json", data = "<note>")]
 fn note_edit(db: DB, id: i32, note: NoteData) -> Result<JSON<Note>, ApiError> {
-    match update_note(db.conn(), id, note) {
-        Ok(note) => Ok(JSON(note)),
-        Err(err) => Err(ApiError::from(err)),
-    }
+    let note = update_note(db.conn(), id, note)?;
+    Ok(JSON(note))
 }
 
 #[delete("/notes/<id>")]
 fn note_delete(db: DB, id: i32) -> Result<NoContent, ApiError> {
-    match delete_note(db.conn(), id) {
-        Ok(_) => Ok(NoContent),
-        Err(err) => Err(ApiError::from(err)),
-    }
+    delete_note(db.conn(), id)?;
+    Ok(NoContent)
 }
 
 fn main() {
